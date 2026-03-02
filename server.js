@@ -72,7 +72,8 @@ app.post("/login", async (req, res) => {
 
     req.session.user = {
       emp_id: user.emp_id,
-      name: user.emp_firstname,
+      name: user.emp_firstname + " " + user.emp_lastname,
+      username: user.username,
       role: user.emp_role
     };
 
