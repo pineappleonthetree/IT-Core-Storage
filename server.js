@@ -72,7 +72,8 @@ app.post("/login", async (req, res) => {
 
     req.session.user = {
       emp_id: user.emp_id,
-      name: user.emp_firstname,
+      name: user.emp_firstname + " " + user.emp_lastname,
+      username: user.username,
       role: user.emp_role
     };
 
@@ -223,6 +224,7 @@ app.get('/adjustment', isLoggedIn, (req, res) => {
 
 // all transactions
 app.get('/transactions', isLoggedIn, transactionAPI.getTransactions);
+
 // all warehouse
 app.get("/api/warehouses", warehouseAPI.getAllWarehouses);
 
