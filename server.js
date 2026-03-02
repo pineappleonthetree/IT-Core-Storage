@@ -224,6 +224,7 @@ app.get('/adjustment', isLoggedIn, (req, res) => {
 
 // all transactions
 app.get('/transactions', isLoggedIn, transactionAPI.getTransactions);
+
 // all warehouse
 app.get("/api/warehouses", warehouseAPI.getAllWarehouses);
 
