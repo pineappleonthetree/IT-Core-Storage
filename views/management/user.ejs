@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/font.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/flowbite@latest/dist/flowbite.min.js"></script>
 </head>
 <body>
     
@@ -58,9 +59,11 @@
             <button class="text-[white] text-[20px] flex justify-center items-center w-[132px] h-[50px] border border-[#4BA3E3]/50 rounded-[11px] bg-transparent gap-3">
                 <i class="fi fi-br-bars-filter mt-2"></i>
                 กรอง</button>
-            <button class="text-[white] text-[20px] flex justify-center items-center w-[132px] h-[50px] rounded-[11px] bg-[#E2A829] gap-3">
+            <button data-modal-target="add-user-modal" data-modal-toggle="add-user-modal"
+                class="text-[white] text-[20px] flex justify-center items-center w-[132px] h-[50px] rounded-[11px] bg-[#E2A829] gap-3">
                 <i class="fa-solid fa-plus" style="color: rgb(255, 255, 255);"></i>
-                เพิ่มผู้ใช้</button>
+                เพิ่มผู้ใช้
+            </button>
         </div>
 
     </div>
@@ -109,5 +112,45 @@
         </table>
      </div>
 
+
+    <div id="add-user-modal" tabindex="-1" 
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+
+        <div class="flex flex-col bg-white rounded-xl shadow-lg w-[720px] h-[570px] p-6">
+            
+            <!-- Header -->
+            <div class="flex justify-between">
+                <p class="text-md font-normal text-[#9E9E9E] ml-5 mt-3">แก้ไขข้อมูล</p>
+                <button data-modal-hide="add-user-modal" class="mr-3">
+                        <i class="fa-solid fa-xmark text-2xl" style="color: #9E9E9E;"></i>
+                </button>
+            </div>
+            <h1 class="text-[36px] ml-5">เพิ่มผู้ใช้งาน</h1>
+
+            <!-- Body -->
+            <div class="flex gap-10 ml-5 mt-8">
+                <img class="w-[35%]" src="/images/user.png" alt="">
+                <div class="flex flex-col w-[50%] ml-8 pt-3">
+                    <span>
+                        <label for="username" class="text-[16px] text-[#9E9E9E]">ชื่อผู้ใช้</label>
+                        <input type="text" id="username" name="username" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1">
+                    </span>
+                    <label for="user_role" class="text-[16px] text-[#9E9E9E] mt-10">บทบาท</label>
+                    <div id="user_role">
+                        <button class="text-[#4BA3E3] text-lg border border-dashed border-[#4BA3E3] border-1 rounded-lg pl-3 pr-3 mt-2 ml-2">
+                            <i class="fa-solid fa-plus" style="color:#4BA3E3;"></i>
+                            เพิ่มบทบาท
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Button -->
+            <div class="w-[100%] flex justify-end pt-5 gap-5 mt-auto mb-3 pr-3">
+                <a href="" class="px-[32px] py-[12px] bg-[#1B3563] rounded-[8px] text-white">ยืนยันการรับเข้า</a>
+                <a href="" class="px-[32px] py-[12px] bg-[#F00] rounded-[8px] text-white">ยกเลิก</a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
