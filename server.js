@@ -222,6 +222,10 @@ app.get('/adjustment', isLoggedIn, (req, res) => {
   res.render('goods_reception/adjustment');
 });
 
+app.get('/profile', isLoggedIn, (req, res) => {
+  res.render('profile/profile');
+})
+
 // all transactions
 app.get('/transactions', isLoggedIn, transactionAPI.getTransactions);
 
