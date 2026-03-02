@@ -341,6 +341,9 @@ app.delete("/api/warehouses/:id", warehouseAPI.deleteWarehouse);
 // get shelf by stock id
 app.get("/api/get-shelf/:id", shelfAPI.getShelfByStockId);
 
+// get all products in shelf by shelf_id
+app.get("/api/get-shelf/:id/products", shelfAPI.getAllProductInShelf);
+
 
 app.get('/user_management', (req, res) => {
   res.render('management/user');
