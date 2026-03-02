@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const pool = require("./db");
 const warehouseAPI = require("./api/warehouse.api");
+const shelfAPI = require("./api/shelf.api")
 
 const app = express();
 app.use(cors());
@@ -160,6 +161,9 @@ app.delete("/api/stocks/:id", warehouseAPI.deleteStock);
 
 // delete warehouse
 app.delete("/api/warehouses/:id", warehouseAPI.deleteWarehouse);
+
+// get shelf by stock id
+app.get("/api/get-shelf/:id", shelfAPI.getShelfByStockId);
 
 
 app.get('/user_management', (req, res) => {
