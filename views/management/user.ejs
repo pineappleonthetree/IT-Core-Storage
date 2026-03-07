@@ -138,28 +138,13 @@
                 <% }) %>
                 </tbody>
         </table>
-        <div class="flex flex-col sm:flex-row justify-between items-center mt-4 lg:mt-6 text-xs lg:text-[13px] text-[#999] gap-4">
-                    <div class="flex items-center gap-2 lg:gap-3">
-                        จำนวนแถวต่อ 1 หน้า
-                        <select id="pageLimit" onchange="changeLimit()"
-                            class="bg-[#182642] border border-[#2A354D] text-white rounded px-2 py-1 outline-none focus:border-[#69B4E3] cursor-pointer">
-                            <option value="10" class="text-white" selected>10</option>
-                            <option value="20" class="text-white">20</option>
-                            <option value="50" class="text-white">50</option>
-                        </select>
-                    </div>
-
-                    <div id="pagination-buttons" class="flex flex-wrap justify-center items-center gap-1 lg:gap-2">
-                        </div>
-                </div>
-     </div>
 
 
     <div id="add-user-modal" tabindex="-1" 
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         
-        <form action="/add_user" method="POST"
-            class="flex flex-col bg-white rounded-xl shadow-lg w-[720px] h-[600px] p-6">
+        <form action="/user_management" method="POST"
+            class="flex flex-col bg-white rounded-xl shadow-lg w-[750px] h-[610px] p-6">
             
             <!-- Header -->
             <div class="flex justify-between">
@@ -188,60 +173,58 @@
 
                     <label for="username" class="text-[16px] text-[#9E9E9E] mt-2">ชื่อผู้ใช้</label>
                     <input type="text" id="username" name="username" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1">
-                    
-                    <label for="password" class="text-[16px] text-[#9E9E9E] mt-2">รหัสผ่าน</label>
-                    <input type="text" id="password" name="password" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1"></label>
-
-                    
-                    <!-- ปุ่มเพิ่ม -->
-                    <!-- <button type="button" id="toggleRole"
-                    class="text-[#4BA3E3] text-lg border border-dashed border-[#4BA3E3] rounded-lg px-3 py-1 flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i>
-                    เพิ่มบทบาท
-                </button> -->
                 
-                <div class="max-w-[600px] mt-2">
-                        <label class="text-[16px] text-[#9E9E9E]">บทบาท</label>
-                        
-                        <div class="flex flex-wrap gap-2.5 items-center mt-2" id="activeTags">
-                            <div class="flex justify-center items-center bg-[#69D1BF]/25 text-[#69D1BF] w-[180px] h-[35px] rounded-xl border-[1.5px] border-[#69D1BF] gap-2 p-2 " data-id="system">
-                                เจ้าหน้าที่คลังสินค้า
-                                <button class="bg-[#e76d74] text-white rounded-full w-5 h-5 flex justify-center items-center text-xs cursor-pointer border-none hover:bg-red-500 transition-colors" onclick="removeTag(this)">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="flex justify-center items-center bg-[#8A38F5]/25 text-[#8A38F5] w-[130px] h-[35px] rounded-xl border-[1.5px] border-[#8A38F5] gap-2 p-2 " data-id="system">
-                                ผู้จัดการ
-                                <button class="bg-[#e76d74] text-white rounded-full w-5 h-5 flex justify-center items-center text-xs cursor-pointer border-none hover:bg-red-500 transition-colors" onclick="removeTag(this)">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                    <!-- บทบาท -->
+                    <div class="mt-2">
+                        <label class="block text-[#9E9E9E] text-[16px]">บทบาท</label>
 
-                            <div class="flex justify-center items-center bg-[#EA7987]/25 text-[#EA7987] w-[150px] h-[35px] rounded-xl border-[1.5px] border-[#EA7987] gap-2 p-2 " data-id="system">
-                                เจ้าหน้าที่ระบบ
-                                <button class="bg-[#e76d74] text-white rounded-full w-5 h-5 flex justify-center items-center text-xs cursor-pointer border-none hover:bg-red-500 transition-colors" onclick="removeTag(this)">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
+                        <!-- แสดง Tag บทบาทที่เลือกแล้ว -->
+                        <div id="selectedRoles" class="flex flex-wrap gap-3 mb-4 mt-2">
+                        <!-- Tag จะถูกเพิ่มที่นี่ด้วย JavaScript -->
+                        </div>
 
-                            <button id="addBtn" onclick="toggleDropdown()" class="text-[#4BA3E3] text-md border border-dashed border-[#4BA3E3] rounded-xl px-3 py-1 flex items-center gap-2">
-                                <i class="fas fa-plus"></i> เพิ่มบทบาท
+                        <!-- Hidden inputs สำหรับส่งค่า roles ไปกับ form -->
+                        <div id="hiddenInputs"></div>
+
+                        <!-- ปุ่มเพิ่มบทบาท + Dropdown -->
+                        <div class="relative inline-block">
+                            <button
+                                type="button"
+                                id="addRoleBtn"
+                                class="border-2 border-dashed border-sky-400 text-sky-500 
+                                    px-6 py-2 rounded-full hover:bg-sky-50 
+                                    transition-colors flex items-center gap-2 font-medium"
+                            >
+                                <i class="fa-solid fa-plus" style="color: sky-400;"></i>
+                                เพิ่มบทบาท
                             </button>
-                        </div>
-
-                        <div id="roleDropdown" class="hidden mt-4 p-4 rounded-xl border border-gray-200 shadow-md w-fit bg-white flex flex-col gap-2">
-                            <div onclick="addTag('warehouse')" class="cursor-pointer text-[16px] text-[#69D1BF] hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                เจ้าหน้าที่คลังสินค้า
-                            </div>
-                            <div onclick="addTag('manager')" class="cursor-pointer text-[16px] text-[#8A38F5] hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                            <!-- Dropdown เลือกบทบาท -->
+                            <div
+                                id="roleDropdown"
+                                class="hidden absolute left-0 top-full mt-2 bg-white border border-gray-200 
+                                    rounded-xl shadow-xl z-10 overflow-hidden min-w-[200px]"
+                            >
+                                <button type="button" data-role="manager"
+                                class="role-option w-full text-left px-5 py-3 hover:bg-purple-50 
+                                        text-gray-700 transition-colors text-base font-medium 
+                                        border-b border-gray-100">
                                 ผู้จัดการ
-                            </div>
-                            <div onclick="addTag('system')" class="cursor-pointer text-[16px] text-[#EA7987] hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                </button>
+                                <button type="button" data-role="sysadmin"
+                                class="role-option w-full text-left px-5 py-3 hover:bg-red-50 
+                                        text-gray-700 transition-colors text-base font-medium 
+                                        border-b border-gray-100">
                                 เจ้าหน้าที่ระบบ
+                                </button>
+                                <button type="button" data-role="warehouse"
+                                class="role-option w-full text-left px-5 py-3 hover:bg-green-50 
+                                        text-gray-700 transition-colors text-base font-medium">
+                                เจ้าหน้าที่คลังสินค้า
+                                </button>
                             </div>
                         </div>
-                        
+                    </div>
+                
                 </div>
             </div>
 
@@ -258,68 +241,161 @@
     </div>
     
     <script>
-        // เก็บข้อมูลสไตล์และชื่อของแต่ละบทบาทอิงตามโค้ดต้นฉบับ
-        const roleConfigs = {
-            'warehouse': {
-                id: 'warehouse',
-                label: 'เจ้าหน้าที่คลังสินค้า',
-                className: 'flex justify-center items-center bg-[#69D1BF]/25 text-[#69D1BF] w-[180px] h-[35px] rounded-xl border-[1.5px] border-[#69D1BF] gap-2 p-2'
+        // ===============================
+        // กำหนดค่าบทบาท พร้อมสีของแต่ละบทบาท
+        // ===============================
+        const rolesConfig = {
+            manager: {
+                label: "ผู้จัดการ",
+                bg: "bg-[#8A38F5]/25",
+                text: "text-purple-700",
+                border: "border-[#8A38F5]",
+                closeBg: "bg-purple-400",
+                closeHover: "hover:bg-purple-500",
             },
-            'manager': {
-                id: 'manager',
-                label: 'ผู้จัดการ',
-                className: 'flex justify-center items-center bg-[#8A38F5]/25 text-[#8A38F5] w-[130px] h-[35px] rounded-xl border-[1.5px] border-[#8A38F5] gap-2 p-2'
+            sysadmin: {
+                label: "เจ้าหน้าที่ระบบ",
+                bg: "bg-[#EA7987]/25",
+                text: "text-red-600",
+                border: "border-[#EA7987]",
+                closeBg: "bg-red-400",
+                closeHover: "hover:bg-red-500",
             },
-            'system': {
-                id: 'system',
-                label: 'เจ้าหน้าที่ระบบ',
-                className: 'flex justify-center items-center bg-[#EA7987]/25 text-[#EA7987] w-[150px] h-[35px] rounded-xl border-[1.5px] border-[#EA7987] gap-2 p-2'
-            }
+            warehouse: {
+                label: "เจ้าหน้าที่คลังสินค้า",
+                bg: "bg-[#69D1BF]/25",
+                text: "text-[#69D1BF]",
+                border: "border-[#69D1BF]",
+                closeBg: "bg-[#69D1BF]",
+                closeHover: "hover:bg-[#50B5A3]",
+            },
         };
 
-        // ฟังก์ชันเปิด/ปิด กล่องเลือกบทบาท
-        function toggleDropdown() {
-            const dropdown = document.getElementById('roleDropdown');
-            dropdown.classList.toggle('hidden');
-        }
+        // เก็บบทบาทที่เลือกแล้ว
+        const selectedRoles = new Set();
 
-        // ฟังก์ชันเพิ่ม Tag ตามบทบาทที่เลือก
-        function addTag(roleKey) {
-            const container = document.getElementById('activeTags');
-            const addBtn = document.getElementById('addBtn');
-            const dropdown = document.getElementById('roleDropdown');
-            const roleData = roleConfigs[roleKey];
+        // DOM Elements
+        const addRoleBtn = document.getElementById("addRoleBtn");
+        const roleDropdown = document.getElementById("roleDropdown");
+        const selectedRolesContainer = document.getElementById("selectedRoles");
+        const hiddenInputsContainer = document.getElementById("hiddenInputs");
+        const roleOptions = document.querySelectorAll(".role-option");
 
-            // เช็คก่อนว่ามี Tag นี้อยู่แล้วหรือยัง (เช็คจาก data-id)
-            const existingTag = document.querySelector(`div[data-id="${roleData.id}"]`);
-            
-            if (!existingTag) {
-                // สร้าง Element ใหม่
-                const newTag = document.createElement('div');
-                newTag.className = roleData.className;
-                newTag.setAttribute('data-id', roleData.id);
-                
-                // ใส่ข้อความและปุ่มกากบาท
-                newTag.innerHTML = `
-                    ${roleData.label}
-                    <button class="bg-[#e76d74] text-white rounded-full w-5 h-5 flex justify-center items-center text-xs cursor-pointer border-none hover:bg-red-500 transition-colors" onclick="removeTag(this)">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                
-                // แทรก Tag ใหม่ไปก่อนหน้าปุ่ม "+ เพิ่มบทบาท"
-                container.insertBefore(newTag, addBtn);
+        // ===============================
+        // เปิด/ปิด Dropdown
+        // ===============================
+        addRoleBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            roleDropdown.classList.toggle("hidden");
+        });
+
+        // ปิด Dropdown เมื่อคลิกข้างนอก
+        document.addEventListener("click", (e) => {
+            if (!roleDropdown.contains(e.target) && e.target !== addRoleBtn) {
+                roleDropdown.classList.add("hidden");
             }
+        });
 
-            // ซ่อนกล่องตัวเลือกหลังกด
-            dropdown.classList.add('hidden');
+        // ===============================
+        // เลือกบทบาทจาก Dropdown
+        // ===============================
+        roleOptions.forEach((option) => {
+            option.addEventListener("click", () => {
+                const roleKey = option.getAttribute("data-role");
+
+                // ถ้าเลือกไปแล้ว ไม่ต้องเพิ่มซ้ำ
+                if (selectedRoles.has(roleKey)) {
+                    roleDropdown.classList.add("hidden");
+                    return;
+                }
+
+                selectedRoles.add(roleKey);
+                renderTags();
+                roleDropdown.classList.add("hidden");
+                updateDropdownOptions();
+            });
+        });
+
+        // ===============================
+        // สร้าง Tag แสดงบทบาทที่เลือก
+        // ===============================
+        function renderTags() {
+            selectedRolesContainer.innerHTML = "";
+            hiddenInputsContainer.innerHTML = "";
+
+            selectedRoles.forEach((roleKey) => {
+                const config = rolesConfig[roleKey];
+
+                // สร้าง Tag Element
+                const tag = document.createElement("span");
+                tag.className = `inline-flex items-center gap-2 px-4 py-2 rounded-full 
+                                border border-2 ${config.bg} ${config.text} ${config.border} 
+                                text-base font-medium animate-fadeIn`;
+                tag.setAttribute("data-role", roleKey);
+
+                tag.innerHTML = `
+                ${config.label}
+                <button type="button" 
+                        class="w-5 h-5 flex items-center justify-center rounded-full 
+                                ${config.closeBg} ${config.closeHover} text-white 
+                                transition-colors ml-1"
+                        onclick="removeRole('${roleKey}')">
+                    <i class="fa-solid fa-xmark w-3.5" style="color: rgb(255, 255, 255);"></i>
+                </button>
+                `;
+
+                selectedRolesContainer.appendChild(tag);
+
+                // สร้าง Hidden Input สำหรับส่งค่าไปกับ Form
+                const hiddenInput = document.createElement("input");
+                hiddenInput.type = "hidden";
+                hiddenInput.name = "roles";
+                hiddenInput.value = roleKey;
+                hiddenInputsContainer.appendChild(hiddenInput);
+            });
         }
 
-        // ฟังก์ชันลบ Tag
-        function removeTag(buttonElement) {
-            const tagElement = buttonElement.parentElement;
-            tagElement.remove();
+        // ===============================
+        // ลบบทบาท
+        // ===============================
+        function removeRole(roleKey) {
+            selectedRoles.delete(roleKey);
+            renderTags();
+            updateDropdownOptions();
+        }
+
+        // ===============================
+        // ซ่อนตัวเลือกที่เลือกไปแล้วใน Dropdown
+        // ===============================
+        function updateDropdownOptions() {
+            roleOptions.forEach((option) => {
+                const roleKey = option.getAttribute("data-role");
+                if (selectedRoles.has(roleKey)) {
+                    option.classList.add("hidden");
+                } else {
+                    option.classList.remove("hidden");
+                }
+            });
+
+            // ถ้าเลือกครบทุกบทบาทแล้ว ซ่อนปุ่มเพิ่ม
+            if (selectedRoles.size >= Object.keys(rolesConfig).length) {
+                addRoleBtn.classList.add("opacity-50", "pointer-events-none");
+            } else {
+                addRoleBtn.classList.remove("opacity-50", "pointer-events-none");
+            }
         }
     </script>
+
+    <!-- Animation -->
+    <!-- <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.2s ease-out;
+        }
+    </style> -->
+
 </body>
 </html>
