@@ -62,7 +62,7 @@
 
             <!-- Search Bar -->
             <div class="relative flex h-14 w-[500px] items-center overflow-hidden rounded-full border border-[#4BA3E3]/20 bg-transparent">
-                <input type="text" id="searchInput" placeholder="ค้นหา ชื่อ" 
+                <input type="text" id="searchInput" placeholder="ค้นหา ชื่อบริษัทผู้จำหน่าย" 
                     class="h-full flex-1 bg-transparent px-8 text-white placeholder-gray-500 outline-none"
                     value="<%= search %>"
                 />
@@ -78,12 +78,41 @@
                 </div>
             </div>
 
-            <!-- Button -->
-            <button class="text-[white] text-[20px] flex justify-center items-center w-[132px] h-[50px] border border-[#4BA3E3]/50 rounded-[11px] bg-transparent gap-3">
-                <i class="fi fi-br-bars-filter mt-2"></i>
-                กรอง
-            </button>
+            <!-- Sort Button-->
+             <div class="relative">
+                <button id="dropdownSortButton" data-dropdown-toggle="dropdownSort"
+                    class="text-[white] text-[20px] flex justify-center items-center w-[132px] h-[50px] border border-[#4BA3E3]/50 rounded-[11px] bg-transparent gap-3">
+                    <i class="fi fi-br-bars-filter mt-2"></i>
+                    กรอง
+                </button>
+                <div id="dropdownSort" class="z-50 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-40 border border-[#4BA3E3]/30">
+                    <ul class="py-2 text-sm text-[#1B3563]" aria-labelledby="dropdownSortButton">
+                        <li>
+                            <button onclick="handleSort('DESC')" class="block w-full text-left px-4 py-3 hover:bg-[#4BA3E3]/20 transition-colors">
+                                <i class="fa-solid fa-arrows-up-down mr-2.5"></i> ใหม่สุด
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="handleSort('ASC')" class="block w-full text-left px-4 py-3 hover:bg-[#4BA3E3]/20 transition-colors">
+                                <i class="fa-solid fa-arrows-up-down mr-2.5"></i> เก่าสุด
+                            </button>
+                        </li>
+                        <hr class="border-[#4BA3E3]/20">
+                        <li>
+                            <button onclick="handleSort('NAME_ASC')" class="block w-full text-left px-3 py-2 hover:bg-[#4BA3E3]/20 transition-colors font-normal">
+                                <i class="fa-solid fa-sort-alpha-down mr-2"></i> ชื่อ ก-ฮ (A-Z)
+                            </button>
+                        </li>
+                        <li>
+                            <button onclick="handleSort('NAME_DESC')" class="block w-full text-left px-3 py-2 hover:bg-[#4BA3E3]/20 transition-colors font-normal">
+                                <i class="fa-solid fa-sort-alpha-up mr-2"></i> ชื่อ ฮ-ก (Z-A)
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
+            <!-- Add/Delete Sup Button -->
             <div class="flex flex-col gap-3 items-end">
                 <button onclick="openModal()"
                     class="text-[white] text-[20px] flex justify-center items-center w-[165px] h-[50px] rounded-[11px] bg-[#E2A829] gap-3">
@@ -102,77 +131,71 @@
     </div>
 
     <!-- User Table -->
-    
-    <!-- ===== ตาราง ===== -->
     <div id="tableContainer" class="relative z-10 transition-transform duration-300">
 
-        <!-- ✅ ไม่มี height ตายตัว / ไม่มี overflow-y ในตาราง -->
         <div class="rounded-2xl overflow-hidden ml-[12%] mt-[8%]" style="width: 1147px;">
-            <table class="w-full table-fixed bg-[#1a2342] shadow-2xl rounded-2xl">
+            <table class="w-full table-fixed  shadow-2xl rounded-2xl border border-[#4BA3E3]/20 border-separate border-spacing-0">
                 <thead>
-                    <tr class="bg-[#2a3a6e]/90 text-white">
+                    <tr class="bg-[#1B3563] text-white">
                         <th class="py-4 px-5 text-left" style="width: 55px;">
                             <input type="checkbox" id="checkAll" class="custom-check" />
                         </th>
-                        <th class="py-4 px-4 text-left text-[16px] font-medium">บริษัทผู้จำหน่าย</th>
-                        <th class="py-4 px-4 text-left text-[16px] font-medium" style="width: 280px;">เบอร์ติดต่อ</th>
-                        <th class="py-4 px-4 text-left text-[16px] font-medium" style="width: 220px;">จัดการผู้ใช้</th>
+                        <th class="py-4 px-4 text-left text-[18px] font-medium">บริษัทผู้จำหน่าย</th>
+                        <th class="py-4 px-4 text-left text-[18px] font-medium" style="width: 280px;">เบอร์ติดต่อ</th>
+                        <th class="py-4 px-4 text-left text-[18px] font-medium" style="width: 220px;">จัดการผู้ใช้</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (suppliers.length === 0) { %>
                         <tr>
-                            <td colspan="4" class="text-center text-gray-400 py-20 text-xl">
-                                <i class="fas fa-inbox text-4xl mb-3 block"></i>
-                                ยังไม่มีผู้จำหน่ายในระบบ
+                            <td colspan="4" class="text-center text-gray-400 py-28 text-xl border-none">
+                                <i class="fas fa-inbox text-5xl mb-4 block text-gray-600"></i>
+                                <span class="font-light">ไม่พบรายชื่อผู้จำหน่ายที่คุณค้นหา</span>
                             </td>
                         </tr>
-                    <% } %>
+                    <% } else { %>
+                        <% suppliers.forEach((sup) => { %>
+                            <tr class="sup-row border-t border-[#2a3a6e]/60 hover:bg-[#1e2b50]/50 transition-colors">
+                                <td class="py-4 px-5 border-t border-[#4BA3E3]/20">
+                                    <input type="checkbox" name="selected" value="<%= sup.sup_id %>" class="row-check custom-check" />
+                                </td>
+                                <td class="py-4 px-4 border-t border-[#4BA3E3]/20">
+                                    <span class="text-white text-[16px]"><%= sup.comp_name %></span>
+                                </td>
+                                <td class="py-4 px-4 border-t border-[#4BA3E3]/20">
+                                    <span class="text-white text-[16px]"><%= sup.comp_phone %></span>
+                                </td>
+                                <td class="py-4 px-4 border-t border-[#4BA3E3]/20">
+                                    <div class="flex gap-4">
+                                        <button onclick="openEditModal(<%= sup.sup_id %>, `<%= sup.comp_name %>`, `<%= sup.comp_phone %>`)"
+                                            class="bg-[#4BA3E3] hover:bg-[#2C8BD0] text-white px-4 py-2 rounded-lg font-normal text-[14px] transition-colors shadow flex items-center gap-2">
+                                            <i class="fas fa-pen-to-square text-s"></i> แก้ไข
+                                        </button>
+                                        <button onclick="confirmDelete(<%= sup.sup_id %>, '<%= sup.comp_name %>')"
+                                            class="bg-[#FF0000] hover:bg-[#DC2626] text-white px-4 py-2 rounded-lg font-normal text-[14px] transition-colors shadow flex items-center gap-2">
+                                            <i class="fas fa-trash text-xs"></i> ลบ
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
 
-                    <!-- ✅ แถวข้อมูลจริง -->
-                    <% suppliers.forEach((sup) => { %>
-                        <tr class="sup-row border-t border-[#2a3a6e]/60 hover:bg-[#1e2b50]/50 transition-colors"
-                            data-name="<%= sup.comp_name.toLowerCase() %>">
-                            <td class="py-4 px-5">
-                                <input type="checkbox" name="selected" value="<%= sup.sup_id %>" class="row-check custom-check" />
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="text-white text-[16px]"><%= sup.comp_name %></span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <span class="text-white text-[16px]"><%= sup.comp_phone %></span>
-                            </td>
-                            <td class="py-4 px-4">
-                                <div class="flex gap-4">
-                                    <button onclick="openEditModal(<%= sup.sup_id %>, `<%= sup.comp_name %>`, `<%= sup.comp_phone %>`)"
-                                        class="bg-[#4BA3E3] hover:bg-[#2C8BD0] text-white px-4 py-2 rounded-lg font-normal text-[14px] transition-colors shadow flex items-center gap-2">
-                                        <i class="fas fa-pen-to-square text-s"></i> แก้ไข
-                                    </button>
-                                    <button onclick="confirmDelete(<%= sup.sup_id %>, '<%= sup.comp_name %>')"
-                                        class="bg-[#FF0000] hover:bg-[#DC2626] text-white px-4 py-2 rounded-lg font-normal text-[14px] transition-colors shadow flex items-center gap-2">
-                                        <i class="fas fa-trash text-xs"></i> ลบ
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    <% }) %>
-
-                        <!-- ✅ แถวว่างเติมให้ครบ limit (เห็นช่องตาราง แต่ไม่มีข้อมูล) -->
                         <% for (let i = suppliers.length; i < limit; i++) { %>
-                            <tr class="border-t border-[#2a3a6e]/60">
-                                <td class="py-4 px-5">&nbsp;</td>
-                                <td class="py-4 px-4">&nbsp;</td>
-                                <td class="py-4 px-4">&nbsp;</td>
-                                <td class="py-4 px-4">&nbsp;</td>
+                            <tr>
+                                <td class="py-4 px-5 border-t border-[#4BA3E3]/20">&nbsp;</td>
+                                <td class="py-4 px-4 border-t border-[#4BA3E3]/20">&nbsp;</td>
+                                <td class="py-4 px-4 border-t border-[#4BA3E3]/20">&nbsp;</td>
+                                <td class="py-4 px-4 border-t border-[#4BA3E3]/20">&nbsp;</td>
                             </tr>
                         <% } %>
+                    <% } %>
                 </tbody>
             </table>
             
-            <!-- ✅ Pagination — mt-6 ให้ห่างจากตาราง -->
+            <!-- Pagination -->
             <div class="flex items-center justify-between py-4 text-white text-[14px]" style="width: 1147px;">
 
-                <!-- ซ้าย -->
+                <!-- Left -->
                 <div class="flex items-center gap-3">
                     <span class="text-gray-400">จำนวนแถวต่อ 1 หน้า</span>
                     <select id="limitSelect" onchange="changeLimit(this.value)"
@@ -181,37 +204,33 @@
                         <option value="5"  <%= limit===5  ? 'selected':'' %>>5</option>
                         <option value="10" <%= limit===10 ? 'selected':'' %>>10</option>
                         <option value="20" <%= limit===20 ? 'selected':'' %>>20</option>
-                        <option value="50" <%= limit===50 ? 'selected':'' %>>50</option>
                     </select>
                 </div>
 
-                <!-- ขวา -->
+                <!-- Right -->
                 <div class="flex items-center gap-0.5">
 
-                    <!-- ◄ ย้อนกลับ -->
-                    <a href="/supplier_management?page=<%= Math.max(1, currentPage-1) %>&limit=<%= limit %>"
-                    class="w-8 h-8 flex items-center justify-center
-                            <%= currentPage <= 1 ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
+                    <a href="/supplier_management?page=1&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>"
+                    class="w-8 h-8 flex items-center justify-center <%= currentPage <= 1 ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
+                        <i class="fas fa-angles-left text-xs"></i>
+                    </a>
+
+                    <a href="/supplier_management?page=<%= Math.max(1, currentPage-1) %>&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>"
+                    class="w-8 h-8 flex items-center justify-center <%= currentPage <= 1 ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
                         <i class="fas fa-chevron-left text-xs"></i>
                     </a>
 
-                    <!-- ✅ เลขหน้า — แสดงทุกหน้า -->
                     <% if (totalPages <= 7) { %>
-                        <!-- หน้าไม่เยอะ แสดงหมด -->
                         <% for (let p = 1; p <= totalPages; p++) { %>
-                            <a href="/supplier_management?page=<%= p %>&limit=<%= limit %>"
+                            <a href="/supplier_management?page=<%= p %>&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>"
                             class="w-8 h-8 flex items-center justify-center text-[14px] font-medium rounded-md
-                                    <%= p === currentPage
-                                        ? 'border border-[#4BA3E3] text-white bg-[#4BA3E3]/10'
-                                        : 'text-gray-400 hover:text-white' %>">
+                                    <%= p === currentPage ? 'border border-[#4BA3E3] text-white bg-[#4BA3E3]/10' : 'text-gray-400 hover:text-white' %>">
                                 <%= p %>
                             </a>
                         <% } %>
                     <% } else { %>
-                        <!-- หน้าเยอะ แสดง 1 ... 4 [5] 6 ... 10 -->
                         <% if (currentPage > 3) { %>
-                            <a href="/supplier_management?page=1&limit=<%= limit %>"
-                            class="w-8 h-8 flex items-center justify-center text-[14px] text-gray-400 hover:text-white rounded-md">1</a>
+                            <a href="/supplier_management?page=1&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white">1</a>
                             <span class="w-8 h-8 flex items-center justify-center text-gray-500">...</span>
                         <% } %>
 
@@ -222,33 +241,26 @@
                             if (currentPage >= totalPages - 2) start = Math.max(1, totalPages - 4);
                         %>
                         <% for (let p = start; p <= end; p++) { %>
-                            <a href="/supplier_management?page=<%= p %>&limit=<%= limit %>"
+                            <a href="/supplier_management?page=<%= p %>&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>"
                             class="w-8 h-8 flex items-center justify-center text-[14px] font-medium rounded-md
-                                    <%= p === currentPage
-                                        ? 'border border-[#4BA3E3] text-white bg-[#4BA3E3]/10'
-                                        : 'text-gray-400 hover:text-white' %>">
+                                    <%= p === currentPage ? 'border border-[#4BA3E3] text-white bg-[#4BA3E3]/10' : 'text-gray-400 hover:text-white' %>">
                                 <%= p %>
                             </a>
                         <% } %>
 
                         <% if (currentPage < totalPages - 2) { %>
                             <span class="w-8 h-8 flex items-center justify-center text-gray-500">...</span>
-                            <a href="/supplier_management?page=<%= totalPages %>&limit=<%= limit %>"
-                            class="w-8 h-8 flex items-center justify-center text-[14px] text-gray-400 hover:text-white rounded-md"><%= totalPages %></a>
+                            <a href="/supplier_management?page=<%= totalPages %>&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white"><%= totalPages %></a>
                         <% } %>
                     <% } %>
 
-                    <!-- ► ถัดไป -->
-                    <a href="/supplier_management?page=<%= Math.min(totalPages, currentPage+1) %>&limit=<%= limit %>"
-                    class="w-8 h-8 flex items-center justify-center
-                            <%= currentPage >= totalPages ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
+                    <a href="/supplier_management?page=<%= Math.min(totalPages, currentPage+1) %>&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>"
+                    class="w-8 h-8 flex items-center justify-center <%= currentPage >= totalPages ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
                         <i class="fas fa-chevron-right text-xs"></i>
                     </a>
 
-                    <!-- ►► ไปหน้าสุดท้าย -->
-                    <a href="/supplier_management?page=<%= totalPages %>&limit=<%= limit %>"
-                    class="w-8 h-8 flex items-center justify-center
-                            <%= currentPage >= totalPages ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
+                    <a href="/supplier_management?page=<%= totalPages %>&limit=<%= limit %>&search=<%= search %>&sort=<%= sort %>"
+                    class="w-8 h-8 flex items-center justify-center <%= currentPage >= totalPages ? 'text-slate-600 pointer-events-none' : 'text-gray-400 hover:text-white' %>">
                         <i class="fas fa-angles-right text-xs"></i>
                     </a>
                 </div>
@@ -257,7 +269,7 @@
 
     </div>
     
-    <!-- ===== Modal แก้ไขผู้จำหน่าย ===== -->
+    <!-- Edit Sup MOdal -->
     <div id="edit-sup-modal"
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 
@@ -273,7 +285,7 @@
             </div>
             <h1 class="text-[36px] ml-5">แก้ไขผู้จัดจำหน่าย</h1>
 
-            <!-- Body -->
+            <!-- Content -->
             <div class="flex flex-col w-[80%] ml-8 mt-5">
                 <label class="text-[16px] text-[#9E9E9E] mt-3">ชื่อบริษัท</label>
                 <input type="text" id="edit_comp_name" name="comp_name" required
@@ -296,13 +308,13 @@
         </form>
     </div>
 
-    <!-- ===== Modal ยืนยันการลบ ===== -->
+    <!-- Delete Sup Modal -->
     <div id="deleteModal"
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60">
 
         <div class="bg-white rounded-2xl shadow-2xl w-[400px] overflow-hidden">
 
-            <!-- เนื้อหา -->
+            <!-- Content -->
             <div class="flex flex-col items-center pt-10 pb-8 px-8">
                 <div class="w-[105px] mb-2">
                     <img src="/images/crisis.png" alt="">
@@ -316,7 +328,7 @@
                 </p>
             </div>
 
-            <!-- ปุ่ม -->
+            <!-- Button -->
             <div class="flex w-full">
                 <form id="deleteForm" method="POST" class="w-1/2">
                     <input type="hidden" name="deleteIds" id="deleteIdsInput" value="">
@@ -335,28 +347,32 @@
         </div>
     </div>
 
+    <!-- Add Sup Modal -->
     <div id="add-sup-modal" tabindex="-1" 
         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
         
         <form action="/supplier_management" method="POST"
             class="relative z-[60] flex flex-col bg-white rounded-xl shadow-lg w-[500px] h-[466px] p-6">
             
+            <!-- Header -->
             <div class="flex justify-between">
-                <p class="text-md font-normal text-[#9E9E9E] ml-5 mt-3">แก้ไขข้อมูล</p>
+                <p class="text-md font-normal text-[#9E9E9E] ml-5 mt-3">เพิ่มข้อมูล</p>
                 <button type="button" onclick="closeModal()" class="mr-3 cursor-pointer">
                         <i class="fa-solid fa-xmark text-2xl" style="color: #9E9E9E;"></i>
                 </button>
             </div>
             <h1 class="text-[36px] ml-5">เพิ่มผู้จัดจำหน่าย</h1>
 
+            <!-- Content -->
             <div class="flex flex-col w-[80%] ml-8 mt-5">
-                    <label for="comp_name" class="text-[16px] text-[#9E9E9E] mt-3">ชื่อบริษัท</label>
-                    <input type="text" id="comp_name" name="comp_name" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1 relative z-[70]">
+                <label for="comp_name" class="text-[16px] text-[#9E9E9E] mt-3">ชื่อบริษัท</label>
+                <input type="text" id="comp_name" name="comp_name" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1 relative z-[70]">
                 
-                    <label for="comp_phone" class="text-[16px] text-[#9E9E9E] mt-3">เบอร์โทรติดต่อ</label>
-                    <input type="text" id="comp_phone" name="comp_phone" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1 relative z-[70]">
-                </div>
+                <label for="comp_phone" class="text-[16px] text-[#9E9E9E] mt-3">เบอร์โทรติดต่อ</label>
+                <input type="text" id="comp_phone" name="comp_phone" class="bg-[#F5F5F5] border-b-2 border-[#1B3563] h-[40px] outline-0 p-3 w-[100%] text-[#1B3563] mt-1 relative z-[70]">
+            </div>
 
+            <!-- Button -->
             <div class="w-[100%] flex justify-end pt-5 gap-5 mt-auto mb-3 pr-3">
                 <button type="submit" class="px-[32px] py-[12px] bg-[#1B3563] rounded-[8px] text-white cursor-pointer hover:bg-[#122443] transition-colors">
                     ยืนยันการเพิ่ม
@@ -370,16 +386,14 @@
 
 
     <script>
-        // =============== Edit Modal ===============
+        // Edit Sup Modal
         function openEditModal(id, name, phone) {
             // ใส่ค่าเดิมลงในฟอร์ม
             document.getElementById('edit_comp_name').value = name;
             document.getElementById('edit_comp_phone').value = phone;
 
-            // เปลี่ยน action ให้ชี้ไปที่ id ที่ต้องการแก้
             document.getElementById('editForm').action = `/supplier_management/edit/${id}`;
 
-            // แสดง Modal
             document.getElementById('edit-sup-modal').classList.remove('hidden');
         }
 
@@ -387,7 +401,6 @@
             document.getElementById('edit-sup-modal').classList.add('hidden');
         }
 
-        // กด Escape ปิด Modal
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
                 closeEditModal();
@@ -395,80 +408,65 @@
             }
         });
 
-        // เปิด Modal ลบ
         function confirmDelete(id, name) {
             document.getElementById('deleteForm').action = `/supplier_management/delete/${id}`;
             document.getElementById('deleteModal').classList.remove('hidden');
         }
 
-        // ปิด Modal ลบ
         function closeDeleteModal() {
             document.getElementById('deleteModal').classList.add('hidden');
         }
 
-        // กด Escape ปิด
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeDeleteModal();
         });
 
-        // กดพื้นหลังปิด
         document.getElementById('deleteModal').addEventListener('click', function(e) {
             if (e.target === this) closeDeleteModal();
         });
 
         const modal = document.getElementById('add-sup-modal');
 
-        // ฟังก์ชันเปิด Modal: ลบคลาส hidden ออก
         function openModal() {
             modal.classList.remove('hidden');
         }
 
-        // ฟังก์ชันปิด Modal: ใส่คลาส hidden กลับเข้าไป
         function closeModal() {
             modal.classList.add('hidden');
         }
 
-        // ค้นหาปุ่มทั้งหมดที่มีแอตทริบิวต์ data-modal-hide="add-sup-modal"
         const closeButtons = document.querySelectorAll('[data-modal-hide="add-sup-modal"]');
         
-        // สั่งให้ปุ่มเหล่านั้นทำงานฟังก์ชัน closeModal เมื่อโดนคลิก
         closeButtons.forEach(button => {
             button.addEventListener('click', closeModal);
         });
 
-        // (ออปชันเสริม) ปิด Modal เมื่อผู้ใช้คลิกโดนพื้นที่สีดำ (พื้นหลัง)
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
                 closeModal();
             }
         });
 
-
-        // === ระบบแสดงปุ่ม "ลบที่เลือก" เมื่อมีการติ๊ก Checkbox ===
-
+        // Checkbox Func
         const checkAll = document.getElementById('checkAll');
         const rowChecks = document.querySelectorAll('.row-check');
         const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
 
-        // ฟังก์ชันเช็กว่ามีการติ๊ก Checkbox แถวไหนอยู่บ้างไหม
+        // ฟังก์ชันเช็กว่ามีการติ๊ก Checkbox แถวไหนอยู่บ้าง
         function updateBulkDeleteButton() {
             const checkedCount = document.querySelectorAll('.row-check:checked').length;
             const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-            const tableContainer = document.getElementById('tableContainer'); // เรียกใช้กล่องตาราง
+            const tableContainer = document.getElementById('tableContainer');
             const checkAll = document.getElementById('checkAll');
             const rowChecks = document.querySelectorAll('.row-check');
             
             if (checkedCount > 0) {
-                // 1. แสดงปุ่มลบ (มันจะโผล่มาใต้ปุ่มเพิ่มผู้จำหน่ายเองเพราะเป็น flex-col)
                 bulkDeleteBtn.classList.remove('hidden');
                 
-                // 2. ดันเฉพาะตารางลงมา 62px (ความสูงปุ่ม + ช่องว่าง) เพื่อหลบปุ่มลบ
                 if(tableContainer) tableContainer.style.transform = "translateY(45px)";
-            } else {
-                // 1. ซ่อนปุ่มลบ
+                } else {
                 bulkDeleteBtn.classList.add('hidden');
-                
-                // 2. ดึงตารางกลับขึ้นไปตำแหน่งเดิม
+
                 if(tableContainer) tableContainer.style.transform = "translateY(0)";
             }
 
@@ -493,41 +491,59 @@
             });
         }
 
-        // ดักจับเมื่อกดปุ่ม "ลบที่เลือก" (Bulk Delete)
+        // Delete Func
         document.getElementById('bulkDeleteBtn').addEventListener('click', function() {
-            // 1. หา checkbox ทั้งหมดที่ถูกติ๊กอยู่
             const checkedBoxes = document.querySelectorAll('.row-check:checked');
-            
-            // 2. ดึงค่า value (ID) จาก checkbox เหล่านั้นมาเก็บเป็น Array
             const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
 
-            // 3. ป้องกันกรณีไม่มีการเลือก (ถึงปกติปุ่มจะซ่อนอยู่ก็ดักไว้ก่อนเพื่อความชัวร์)
+            // ป้องกันกรณีไม่มีการเลือก (ถึงปกติปุ่มจะซ่อนอยู่ก็ดักไว้ก่อนเพื่อความชัวร์)
             if (selectedIds.length === 0) return;
 
-            // 4. ตั้งค่า URL (Action) ของฟอร์ม ไปยัง Route สำหรับลบหลายรายการ
             document.getElementById('deleteForm').action = '/supplier_management/bulk-delete';
-
-            // 5. เอา ID ทั้งหมดมารวมกันเป็นข้อความคั่นด้วยลูกน้ำ (เช่น "1,4,5") แล้วใส่ในช่องที่ซ่อนไว้
             document.getElementById('deleteIdsInput').value = selectedIds.join(',');
-
-            // 6. เปิด Modal
             document.getElementById('deleteModal').classList.remove('hidden');
         });
 
+        // Search Func
         function handleSearch() {
             const keyword = document.getElementById('searchInput').value;
             // ส่งคำค้นหาไปที่ URL พร้อมกำหนดให้กลับไปหน้า 1 เสมอ
             window.location.href = `/supplier_management?page=1&limit=<%= limit %>&search=${encodeURIComponent(keyword)}`;
         }
 
-        // เพิ่มความสะดวก: กด Enter ในช่อง Input แล้วให้ค้นหาทันที
         document.getElementById('searchInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 handleSearch();
             }
         });
 
-        
+        // Sort Func
+        function changeLimit(value) {
+            const keyword = document.getElementById('searchInput').value;
+            // ดึงค่า sort ปัจจุบันจากตัวแปร EJS หรือจาก URL
+            const currentSort = '<%= sort %>'; 
+            
+            window.location.href = `/supplier_management?page=1&limit=${value}&search=${encodeURIComponent(keyword)}&sort=${currentSort}`;
+        }
+
+        // ฟังก์ชันจัดการการเรียงลำดับ
+        function handleSort(sortValue) {
+            const keyword = document.getElementById('searchInput').value;
+            const limit = document.getElementById('limitSelect').value;
+            
+            // ส่งไปที่หน้า 1 เสมอเมื่อมีการเปลี่ยนการกรอง
+            window.location.href = `/supplier_management?page=1&limit=${limit}&search=${encodeURIComponent(keyword)}&sort=${sortValue}`;
+        }
+
+        // ปรับปรุงฟังก์ชัน Search เดิมให้ส่งค่า sort ไปด้วย (เพื่อไม่ให้ค่า sort หายเวลาค้นหา)
+        function handleSearch() {
+            const keyword = document.getElementById('searchInput').value;
+            const limit = document.getElementById('limitSelect').value;
+            const currentSort = '<%= sort %>'; // รักษาค่าการกรองเดิมไว้
+
+            window.location.href = `/supplier_management?page=1&limit=${limit}&search=${encodeURIComponent(keyword)}&sort=${currentSort}`;
+        }
+                
 
     </script>
 

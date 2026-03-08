@@ -271,39 +271,53 @@ app.get("/product_management", (req, res) => {
 app.get("/supplier_management", async (req, res) => {
   try {
     const page   = parseInt(req.query.page)  || 1;
-    const limit  = parseInt(req.query.limit) || 10;
-    const search = req.query.search || ""; // รับค่าค้นหา
+    const limit  = parseInt(req.query.limit) || 5;
+    const search = req.query.search || "";
+    const sort   = req.query.sort   || "DESC"; 
     const offset = (page - 1) * limit;
 
-    // เตรียม Pattern สำหรับค้นหา (เช่น พิมพ์ "ก" จะได้ "%ก%")
     const searchPattern = `%${search}%`;
 
-    // 1. ดึงข้อมูลที่ตรงตามเงื่อนไขค้นหา และแบ่งหน้า
+    let orderBy = "";
+
+    if (sort === "NAME_ASC") {
+        // A-Z ก-ฮ
+        orderBy = `
+            CASE WHEN comp_name REGEXP '^[A-Za-z]' THEN 1 ELSE 2 END ASC, 
+            comp_name COLLATE utf8mb4_unicode_ci ASC`;
+    } else if (sort === "NAME_DESC") {
+        // Z-A ฮ-ก
+        orderBy = `
+            CASE WHEN comp_name REGEXP '^[A-Za-z]' THEN 1 ELSE 2 END ASC, 
+            comp_name COLLATE utf8mb4_unicode_ci DESC`;
+    } else if (sort === "ASC") {
+        orderBy = "sup_id ASC";
+    } else {
+        orderBy = "sup_id DESC";
+    }
+
     const [rows] = await pool.query(
-      "SELECT * FROM suppliers WHERE available = 1 AND comp_name LIKE ? ORDER BY sup_id DESC LIMIT ? OFFSET ?",
+      `SELECT * FROM suppliers WHERE available = 1 AND comp_name LIKE ? ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
       [searchPattern, limit, offset]
     );
 
-    // 2. นับจำนวนทั้งหมดที่ค้นหาเจอ (เพื่อให้ Pagination คำนวณเลขหน้าถูก)
     const [[{ total }]] = await pool.query(
       "SELECT COUNT(*) as total FROM suppliers WHERE available = 1 AND comp_name LIKE ?",
       [searchPattern]
     );
 
-    const totalPages = Math.ceil(total / limit);
-
     res.render("management/supplier", {
       suppliers: rows,
       currentPage: page,
-      totalPages,
+      totalPages: Math.ceil(total / limit),
       limit,
       total,
-      search // *** ต้องส่งค่านี้กลับไปด้วย เพื่อให้หน้าเว็บรู้ว่ากำลังค้นหาคำว่าอะไรอยู่
+      search,
+      sort 
     });
-
   } catch (err) {
     console.error(err);
-    res.send("Database Error");
+    res.status(500).send("Database Error");
   }
 });
 
@@ -339,20 +353,16 @@ app.post("/supplier_management/delete/:id", async (req, res) => {
 
 app.post("/supplier_management/bulk-delete", async (req, res) => {
   try {
-    // 1. รับค่า ID ที่ส่งมาจาก <input type="hidden" name="deleteIds">
-    // ค่าที่ได้จะเป็น String เช่น "101,102,105"
     const idsString = req.body.deleteIds;
 
-    // ถ้าไม่มีการส่งค่ามาให้กลับไปหน้าเดิม
     if (!idsString) {
       return res.redirect("/supplier_management");
     }
 
-    // 2. แปลง String ให้เป็น Array เช่น ['101', '102', '105']
+    // แปลง String ให้เป็น Array
     const idsArray = idsString.split(',');
 
-    // 3. ใช้คำสั่ง IN (?) เพื่ออัปเดตหลายๆ id ในรอบเดียว
-    // หมายเหตุ: ต้องใส่ [idsArray] เพื่อให้ mysql ขยายค่า Array ลงไปในวงเล็บของ IN ได้ถูกต้อง
+    // IN (?) เพื่ออัปเดตหลาย ๆ id ในรอบเดียว
     await pool.query(
       "UPDATE suppliers SET available = 0 WHERE sup_id IN (?)",
       [idsArray] 
@@ -369,30 +379,23 @@ app.post("/supplier_management", async (req, res) => {
   try {
     const { comp_name, comp_phone } = req.body;
 
-    // ตรวจสอบว่ามีชื่อนี้อยู่ใน database แล้วหรือไม่
+    // comp_name & comp_phone are the same
     const [existing] = await pool.query(
-      "SELECT * FROM suppliers WHERE comp_name = ?",
-      [comp_name]
+      "SELECT * FROM suppliers WHERE comp_name = ? AND comp_phone = ?",
+      [comp_name, comp_phone]
     );
 
     if (existing.length > 0) {
       const supplier = existing[0];
 
       if (supplier.available === 0) {
-        // ✅ เคยถูกลบไป → กู้คืน + อัปเดตเบอร์
         await pool.query(
-          "UPDATE suppliers SET available = 1, comp_phone = ? WHERE sup_id = ?",
-          [comp_phone, supplier.sup_id]
-        );
-      } else {
-        // ⚠️ มีอยู่แล้วและยัง active → อัปเดตเบอร์
-        await pool.query(
-          "UPDATE suppliers SET comp_phone = ? WHERE sup_id = ?",
-          [comp_phone, supplier.sup_id]
+          "UPDATE suppliers SET available = 1 WHERE sup_id = ?",
+          [supplier.sup_id]
         );
       }
+
     } else {
-      // ✅ ไม่มีในระบบ → เพิ่มใหม่
       await pool.query(
         "INSERT INTO suppliers (comp_name, comp_phone, available) VALUES (?, ?, 1)",
         [comp_name, comp_phone]
@@ -403,10 +406,9 @@ app.post("/supplier_management", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.redirect("/supplier_management");
+    res.status(500).send("Database Error");
   }
 });
-
 
 const PORT = 3000;
 app.listen(PORT, () => {
